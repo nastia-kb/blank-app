@@ -3,3 +3,5 @@ pandas
 io
 re
 spacy
+xlsxwriter
+openpyxl
