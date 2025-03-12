@@ -1,7 +1,6 @@
 streamlit
 pip
 pandas
-io
 re
 spacy
 xlsxwriter
