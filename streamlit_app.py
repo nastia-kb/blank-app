@@ -71,7 +71,7 @@ if st.button("Запустить"):
          answers = data[i]
          answers = answers.str.replace(")", "")
          answers = answers.str.replace("(","")
-         ans_list = (";").join(data[i])
+         ans_list = (";").join(answers.astype(str))
          ans = list( set(ans_list.split(";")))
          for j in ans:
              data[j] = answers.str.contains(j)
