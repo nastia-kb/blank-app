@@ -29,7 +29,7 @@ if st.button("Запустить"):
 
     for uploaded_file in uploaded_files:
         k+=1
-        temp_data = pd.read_excel(uploaded_file)
+        temp_data = pd.read_excel(uploaded_file, engine="openpyxl")
         temp_data["0_concept_n"] = k
         if k == 1:
             columns = temp_data.columns
@@ -71,6 +71,7 @@ if st.button("Запустить"):
          answers = data.loc[data[i].notna(), i]
          answers = answers.str.replace(")", "")
          answers = answers.str.replace("(","")
+         answers = answers.str.replace("\n","")
          ans_list = (";").join(answers.astype(str))
          ans = list(set(ans_list.split(";")))
          for j in ans:
