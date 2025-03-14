@@ -2,7 +2,7 @@ streamlit
 pip
 numpy==1.23.5
 scipy==1.10.1
-pandas==1.5.3
+pandas==2.2.3
 spacy
 ru-core-news-lg@ https://github.com/explosion/spacy-models/releases/download/ru_core_news_lg-3.5.0/ru_core_news_lg-3.5.0.tar.gz
 xlsxwriter
