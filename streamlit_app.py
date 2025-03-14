@@ -71,7 +71,7 @@ if st.button("Запустить"):
          answers = data[i]
          answers = answers.str.replace(")", "")
          answers = answers.str.replace("(","")
-         ans_list = (";").join(data[i].astype(str))
+         ans_list = (";").join(answers.astype(str))
          ans = list(set(ans_list.split(";")))
          for j in ans:
              data[j] = answers.str.contains(j)
@@ -90,25 +90,29 @@ if st.button("Запустить"):
          results = pd.concat([results, temp])
         
 # шкальные вопросы
-    data[scale].astype('int64')
-    data[scale] = data[scale].replace([1, 2, 3], 0)
-    data[scale] = data[scale].replace([4, 5], 1)
-    temp = data.groupby("0_concept_n").sum()[scale].T
-    temp["Среднее по концептам"] = temp.sum(axis = 1)
-    bases = list(data.groupby("0_concept_n").count()[scale[0]])
-    bases.append(sum(bases))
-    temp.index.name = "Вопрос"
-    temp["Ответы"] = "Топ-2 (оценки 4-5)"
-    temp = temp.set_index("Ответы", append=True)
-    temp = temp / bases
     nums = []
+    temp_res = pd.DataFrame()
     for i in scale:
-         num = i.split(".")[0]
-         nums.append(int(num))
-    temp["№"] = nums
-    results = pd.concat([results, temp], axis = 0)
-    results.sort_values(by=["№", "Среднее по концептам"], ascending=[True, False], inplace = True)
+        temp_data = data.loc[data[i].notna(), [i, "0_concept_n"]]
+        temp_data[i].astype('int64')
+        temp_data[i] = temp_data[i].replace([1, 2, 3], 0)
+        temp_data[i] = temp_data[i].replace([4, 5], 1)
+        temp = temp_data.groupby("0_concept_n").sum().T
+        temp["Среднее по концептам"] = temp.sum(axis = 1)
+        bases = list(temp_data.groupby("0_concept_n").count()[i])
+        bases.append(sum(bases))
+        temp.index.name = "Вопрос"
+        temp["Ответы"] = "Топ-2 (оценки 4-5)"
+        temp = temp.set_index("Ответы", append=True)
+        temp = temp / bases
+        num = i.split(".")[0]
+        nums.append(int(num))
+        temp_res = pd.concat([temp_res, temp], axis = 0)
 
+    temp_res["№"] = nums
+    results = pd.concat([results, temp_res], axis = 0)
+    results.sort_values(by=["№", "Среднее по концептам"], ascending=[True, False], inplace = True)
+        
     # обработка текста
     temp = pd.DataFrame(columns = results.columns, index = [open_qst])
     nlp = spacy.load('ru_core_news_lg')
@@ -157,6 +161,8 @@ if st.button("Запустить"):
     results.sort_values(by=["№", "Среднее по концептам"], ascending=[True, False], inplace = True)
     results.drop(columns=["№"], inplace=True)
     
+    bases = list(data.groupby("0_concept_n").count()[last_q])
+    bases.append(sum(bases))
     bases_pd = pd.DataFrame(index = results.columns, columns = ["Количество ответов"])
     bases_pd["Количество ответов"] = bases
     bases_pd = bases_pd.T
