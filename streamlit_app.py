@@ -68,7 +68,7 @@ if st.button("Запустить"):
 
 # вопросы с выбором ответа
     for i in choice:
-         answers = data[i]
+         answers = data.loc[data[i].notna(), i]
          answers = answers.str.replace(")", "")
          answers = answers.str.replace("(","")
          ans_list = (";").join(answers.astype(str))
