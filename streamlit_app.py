@@ -4,6 +4,7 @@ from io import StringIO
 import re
 import spacy
 import io
+pd.__version__
 
 st.title("Тест концептов")
 
