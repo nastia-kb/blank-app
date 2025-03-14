@@ -76,8 +76,6 @@ if st.button("Запустить"):
          for j in ans:
              data[j] = answers.str.contains(j)
            
-         data
-         ans
          temp =  data.groupby("0_concept_n").sum()[ans].T
          temp["Среднее по концептам"] = temp.sum(axis = 1)
          bases = list(data.groupby("0_concept_n").count()[ans[0]])
