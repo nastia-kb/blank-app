@@ -96,8 +96,12 @@ if st.button("Запустить"):
     for i in scale:
         temp_data = data.loc[data[i].notna(), [i, "0_concept_n"]]
         temp_data[i].astype('int64')
-        temp_data[i] = temp_data[i].replace([1, 2, 3], 0)
-        temp_data[i] = temp_data[i].replace([4, 5], 1)
+        if min(temp_data[i]) < 0:
+            temp_data[i] = temp_data[i].replace([-2, -1, 0], 0)
+            temp_data[i] = temp_data[i].replace([1, 2], 1)
+        else:
+            temp_data[i] = temp_data[i].replace([1, 2, 3], 0)
+            temp_data[i] = temp_data[i].replace([4, 5], 1)
         temp = temp_data.groupby("0_concept_n").sum().T
         temp["Среднее по концептам"] = temp.sum(axis = 1)
         bases = list(temp_data.groupby("0_concept_n").count()[i])
