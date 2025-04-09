@@ -51,6 +51,7 @@ if st.button("Запустить"):
 
     data.drop(columns=cols_to_drop, inplace = True)
     cols = data.columns
+    data.reset_index(drop = True, inplace = True)
 
     open_qst = cols[cols.str.contains("Open question")]
     choice = cols[cols.str.contains("Choice")]
