@@ -1,5 +1,6 @@
 #!/bin/bash
 
+ACCEPT_EULA=Y
 python -m venv venv
 source venv/bin/activate
 
@@ -14,4 +15,4 @@ ACCEPT_EULA=Y  pip install -r requirements.txt
 ACCEPT_EULA=Y pip install --no-build-isolation --editable .
 
 # Download Russian model
-python -m spacy download ru_core_news_lg
+ACCEPT_EULA=Y python -m spacy download ru_core_news_lg
