@@ -4,13 +4,10 @@ python -m venv venv
 source venv/bin/activate
 
 pip install --upgrade pip setuptools wheel
-pip install -r requirements.txt
 
-# Install spaCy from source
-git clone https://github.com/explosion/spaCy
-cd spaCy
+# Try regular spaCy install first
 pip install -r requirements.txt
-pip install --no-build-isolation --editable
+pip install spacy
 
 # Download Russian model
 python -m spacy download ru_core_news_lg
