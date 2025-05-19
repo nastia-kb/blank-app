@@ -21,7 +21,7 @@ with st.expander("Краткое описание"):
 
 
 uploaded_files = st.file_uploader(
-    "Загрузите файлы Excel *в названии только латиница/цифры*", type='xlsx', accept_multiple_files=True)
+    "Загрузите файлы Excel **(в названии только латиница/цифры)**", type='xlsx', accept_multiple_files=True)
 
 if st.button("Запустить"):
     k = 0
