@@ -5,6 +5,10 @@ import re
 import spacy
 import io
 
+st.set_page_config(
+    page_title="Тест концептов"
+)
+
 st.title("Тест концептов")
 
 st.info("Здесь можно обработать результаты теста концептов, проведенного на Pathway", 
