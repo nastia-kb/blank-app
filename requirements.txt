@@ -2,7 +2,7 @@ streamlit
 pip
 numpy==1.23.5
 scipy==1.10.1
-pandas==2.2.3
+pandas==1.5.3
 spacy
 xlsxwriter
 openpyxl
