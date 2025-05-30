@@ -24,7 +24,7 @@ with st.expander("Краткое описание"):
 
 
 uploaded_file = st.file_uploader(
-    "Загрузите файлы Excel **(в названии только латиница/цифры)**", type='xlsx', accept_multiple_files=False)
+    "Загрузите файлы Excel", type='xlsx', accept_multiple_files=False)
 
 cloud = st.checkbox("Нужно облако слов")
 
