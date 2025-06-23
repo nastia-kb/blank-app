@@ -73,28 +73,32 @@ if st.button("Запустить"):
 
 # вопросы с выбором ответа
     for i in choice:
-         answers = data.loc[data[i].notna(), i]
-         answers = answers.str.replace(")", "")
-         answers = answers.str.replace("(","")
-         answers = answers.str.replace("\n","")
-         ans_list = (";").join(answers.astype(str))
-         ans = list(set(ans_list.split(";")))
-         for j in ans:
-             data[j] = answers.str.contains(j)
-         ans.append("0_concept_n")
-         temp = data[ans].groupby("0_concept_n").sum().T
-         temp["Среднее по концептам"] = temp.sum(axis = 1)
-         bases = list(data.groupby("0_concept_n").count()[ans[0]])
-         bases.append(sum(bases))
-         temp.index.name = "Ответы"
-         temp["Вопрос"] = i
-         temp = temp.set_index("Вопрос", append=True)
-         temp = temp.swaplevel()
-         temp = temp / bases
-         temp["№"] = int(i.split(".")[0])
-         temp.sort_values(by="Среднее по концептам", ascending=False, inplace = True)
-         results = pd.concat([results, temp])
-        
+         try:
+             answers = data.loc[data[i].notna(), i]
+             answers = answers.str.replace(")", "")
+             answers = answers.str.replace("(","")
+             answers = answers.str.replace("\n","")
+             ans_list = (";").join(answers.astype(str))
+             ans = list(set(ans_list.split(";")))
+             for j in ans:
+                 data[j] = answers.str.contains(j)
+             ans.append("0_concept_n")
+             temp = data[ans].groupby("0_concept_n").sum().T
+             temp["Среднее по концептам"] = temp.sum(axis = 1)
+             bases = list(data.groupby("0_concept_n").count()[ans[0]])
+             bases.append(sum(bases))
+             temp.index.name = "Ответы"
+             temp["Вопрос"] = i
+             temp = temp.set_index("Вопрос", append=True)
+             temp = temp.swaplevel()
+             temp = temp / bases
+             temp["№"] = int(i.split(".")[0])
+             temp.sort_values(by="Среднее по концептам", ascending=False, inplace = True)
+             results = pd.concat([results, temp])
+             
+         except:
+             st.error(f"Возникла проблема с обработкой вопроса **{i}**")
+            
 # шкальные вопросы
     nums = []
     temp_res = pd.DataFrame()
