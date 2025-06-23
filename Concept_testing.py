@@ -103,52 +103,40 @@ if st.button("Запустить"):
     nums = []
     temp_res = pd.DataFrame()
     for i in scale:
-        temp_data = data.loc[data[i].notna(), [i, "0_concept_n"]]
-        temp_data[i].astype('int64')
-        if min(temp_data[i]) < 0:
-            temp_data[i] = temp_data[i].replace([-2, -1, 0], 0)
-            temp_data[i] = temp_data[i].replace([1, 2], 1)
-        else:
-            temp_data[i] = temp_data[i].replace([1, 2, 3], 0)
-            temp_data[i] = temp_data[i].replace([4, 5], 1)
-        temp = temp_data.groupby("0_concept_n").sum().T
-        temp["Среднее по концептам"] = temp.sum(axis = 1)
-        bases = list(temp_data.groupby("0_concept_n").count()[i])
-        bases.append(sum(bases))
-        temp.index.name = "Вопрос"
-        temp["Ответы"] = "Топ-2 (оценки 4-5)"
-        temp = temp.set_index("Ответы", append=True)
-        temp = temp / bases
-        num = i.split(".")[0]
-        nums.append(int(num))
-        temp_res = pd.concat([temp_res, temp], axis = 0)
+        try:
+            temp_data = data.loc[data[i].notna(), [i, "0_concept_n"]]
+            temp_data[i].astype('int64')
+            if min(temp_data[i]) < 0:
+                temp_data[i] = temp_data[i].replace([-2, -1, 0], 0)
+                temp_data[i] = temp_data[i].replace([1, 2], 1)
+            else:
+                temp_data[i] = temp_data[i].replace([1, 2, 3], 0)
+                temp_data[i] = temp_data[i].replace([4, 5], 1)
+            temp = temp_data.groupby("0_concept_n").sum().T
+            temp["Среднее по концептам"] = temp.sum(axis = 1)
+            bases = list(temp_data.groupby("0_concept_n").count()[i])
+            bases.append(sum(bases))
+            temp.index.name = "Вопрос"
+            temp["Ответы"] = "Топ-2 (оценки 4-5)"
+            temp = temp.set_index("Ответы", append=True)
+            temp = temp / bases
+            num = i.split(".")[0]
+            nums.append(int(num))
+            temp_res = pd.concat([temp_res, temp], axis = 0)
 
-    temp_res["№"] = nums
-    results = pd.concat([results, temp_res], axis = 0)
-    results.sort_values(by=["№", "Среднее по концептам"], ascending=[True, False], inplace = True)
+            temp_res["№"] = nums
+            results = pd.concat([results, temp_res], axis = 0)
+            results.sort_values(by=["№", "Среднее по концептам"], ascending=[True, False], inplace = True)
+        
+        except:
+             st.error(f"Возникла проблема с обработкой вопроса **{i}**")
         
     # обработка текста
     temp = pd.DataFrame(columns = results.columns, index = [open_qst])
     nlp = spacy.load('ru_core_news_lg')
     for i in open_qst:
-        texts = data.loc[data[i].notna(), i]
-        doc = nlp(" ".join(texts.astype(str)).lower())
-        keywords_freq = [token.lemma_ for token in doc if not token.is_stop and token.is_alpha]
-        keywords = {}
-        for key in keywords_freq:
-            if not keywords.get(key, False):
-                keywords[key] = 1
-            else:
-                keywords[key] += 1
-        sorted_keys = dict(sorted(keywords.items(), key=lambda item: item[1], reverse = True))
-        frq_fin = pd.DataFrame(data = sorted_keys, index = ["Частота"]).T
-        frq_fin["Слово"] = frq_fin.index
-        frq_fin.index = [i for i in range(len(frq_fin))]
-        temp["Среднее по концептам"][i] = (", ").join(frq_fin[:20]["Слово"])
-        n_con = list(data["0_concept_n"].unique())
-        for j in n_con:
-            data_temp = data.loc[data["0_concept_n"] == j]
-            texts = data_temp.loc[data_temp[i].notna(), i]
+        try:
+            texts = data.loc[data[i].notna(), i]
             doc = nlp(" ".join(texts.astype(str)).lower())
             keywords_freq = [token.lemma_ for token in doc if not token.is_stop and token.is_alpha]
             keywords = {}
@@ -160,8 +148,28 @@ if st.button("Запустить"):
             sorted_keys = dict(sorted(keywords.items(), key=lambda item: item[1], reverse = True))
             frq_fin = pd.DataFrame(data = sorted_keys, index = ["Частота"]).T
             frq_fin["Слово"] = frq_fin.index
-            frq_fin.index = [k for k in range(len(frq_fin))]
-            temp[j][i] = (", ").join(frq_fin[:20]["Слово"])
+            frq_fin.index = [i for i in range(len(frq_fin))]
+            temp["Среднее по концептам"][i] = (", ").join(frq_fin[:20]["Слово"])
+            n_con = list(data["0_concept_n"].unique())
+            for j in n_con:
+                data_temp = data.loc[data["0_concept_n"] == j]
+                texts = data_temp.loc[data_temp[i].notna(), i]
+                doc = nlp(" ".join(texts.astype(str)).lower())
+                keywords_freq = [token.lemma_ for token in doc if not token.is_stop and token.is_alpha]
+                keywords = {}
+                for key in keywords_freq:
+                    if not keywords.get(key, False):
+                        keywords[key] = 1
+                    else:
+                        keywords[key] += 1
+                sorted_keys = dict(sorted(keywords.items(), key=lambda item: item[1], reverse = True))
+                frq_fin = pd.DataFrame(data = sorted_keys, index = ["Частота"]).T
+                frq_fin["Слово"] = frq_fin.index
+                frq_fin.index = [k for k in range(len(frq_fin))]
+                temp[j][i] = (", ").join(frq_fin[:20]["Слово"])
+        except:
+             st.error(f"Возникла проблема с обработкой вопроса **{i}**")
+    
     nums = []
     for i in open_qst:
          num = i.split(".")[0]
