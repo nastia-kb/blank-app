@@ -18,7 +18,7 @@ with st.expander("Краткое описание"):
             st.write("Скрипт умеет обрабатывать типы вопросов: "
             "\n * Scale -- шкала. Рассчитывается оценка топ-2"
             "\n * Choice -- закpытый вопрос с одним или несколькими вариантами ответа. Ответы выводятся по убыванию частоты"
-            "\n * Open question -- открытый вопрос. Выводится топ-20 наиболее частых слов" 
+            "\n * Question -- открытый вопрос. Выводится топ-20 наиболее частых слов" 
             "\n * Preference -- выбор медиа. Варианты выводятся по убыванию частоты"
             "\n\n Результаты формируются от завершенных анкет. "
             "Завершенными считаются анкеты, где есть ответ на последний вопрос, который не является открытым")
@@ -57,14 +57,14 @@ if st.button("Запустить"):
     cols = data.columns
     data.reset_index(drop = True, inplace = True)
 
-    open_qst = cols[cols.str.contains("Open question")]
+    open_qst = cols[cols.str.contains("Question")]
     choice = cols[cols.str.contains("Choice")]
     scale = cols[cols.str.contains("Scale")]
     preference = cols[cols.str.contains("Preference")]
     choice = choice.append(preference)
 
     for i in cols:
-         if "Open question" not in i and "0_concept_n" not in i:
+         if "Question" not in i and "0_concept_n" not in i:
               last_q = i
 
     data = data.loc[data[last_q].notna()]
