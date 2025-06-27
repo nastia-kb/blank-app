@@ -124,9 +124,9 @@ if st.button("Запустить"):
             nums.append(int(num))
             temp_res = pd.concat([temp_res, temp], axis = 0)
 
-            temp_res["№"] = nums
-            results = pd.concat([results, temp_res], axis = 0)
-            results.sort_values(by=["№", "Среднее по концептам"], ascending=[True, False], inplace = True)
+        temp_res["№"] = nums
+        results = pd.concat([results, temp_res], axis = 0)
+        results.sort_values(by=["№", "Среднее по концептам"], ascending=[True, False], inplace = True)
         
         except:
              st.error(f"Возникла проблема с обработкой вопроса **{i}**")
