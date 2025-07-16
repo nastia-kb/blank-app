@@ -41,64 +41,74 @@ if st.button("Запустить"):
             temp_data.columns = columns
         data = pd.concat([data, temp_data])
 
+    data = data.drop(columns=[col for col in data.columns if "Other (text)" in col])
+    data = data.drop(columns = ["Completion time, ms", "Answer Date"])
     cols = data.columns
-    cols_to_drop = cols[cols.str.contains("other answers")]
-
-    data.drop(columns=cols_to_drop, inplace = True)
-
-    def f1(string):
-        return not(any(i.isdigit() for i in string))
-
-    cols = data.columns
-    idx = [f1(item) for item in cols]
-    cols_to_drop = cols[idx]
-
-    data.drop(columns=cols_to_drop, inplace = True)
-    cols = data.columns
-    data.reset_index(drop = True, inplace = True)
 
     open_qst = cols[cols.str.contains("Question")]
     choice = cols[cols.str.contains("Choice")]
+    
+    choice_clean = []
+    for i in choice:
+        index = i.rfind(':')
+        clean = i[:index]
+        if clean not in choice_clean:
+            choice_clean.append(clean)
+
     scale = cols[cols.str.contains("Scale")]
     preference = cols[cols.str.contains("Preference")]
-    choice = choice.append(preference)
 
     for i in cols:
-         if "Question" not in i and "0_concept_n" not in i:
+         if "Question" not in i and "0_concept_n" not in i and "Other (text)" not in i:
               last_q = i
 
     data = data.loc[data[last_q].notna()]
+    data.reset_index(drop=True, inplace = True)
 
     results = pd.DataFrame()
 
 # вопросы с выбором ответа
-    for i in choice:
+    for choice in choice_clean:
          try:
-             answers = data.loc[data[i].notna(), i]
-             answers = answers.str.replace(")", "")
-             answers = answers.str.replace("(","")
-             answers = answers.str.replace("\n","")
-             ans_list = (";").join(answers.astype(str))
-             ans = list(set(ans_list.split(";")))
-             for j in ans:
-                 data[j] = answers.str.contains(j)
-             ans.append("0_concept_n")
-             temp = data[ans].groupby("0_concept_n").sum().T
+             temp_data = data.filter(like=choice)
+             clean_ans = []
+             for col in temp_data.columns:
+                 index = col.rfind(':')
+                 clean = col[index+2:]
+                 clean_ans.append(clean)
+             temp_data.columns = clean_ans
+             temp_data.dropna(axis = 0, inplace = True)
+             temp_data["0_concept_n"] = data.loc[temp_data.index, "0_concept_n"]
+             temp = temp_data.groupby("0_concept_n").sum().T
              temp["Среднее по концептам"] = temp.sum(axis = 1)
-             bases = list(data.groupby("0_concept_n").count()[ans[0]])
+             bases = list(temp_data.groupby("0_concept_n").count()[clean_ans[0]])
              bases.append(sum(bases))
              temp.index.name = "Ответы"
-             temp["Вопрос"] = i
+             temp["Вопрос"] = choice
              temp = temp.set_index("Вопрос", append=True)
              temp = temp.swaplevel()
              temp = temp / bases
-             temp["№"] = int(i.split(".")[0])
+             temp["№"] = int(choice.split(".")[0])
              temp.sort_values(by="Среднее по концептам", ascending=False, inplace = True)
              results = pd.concat([results, temp])
              
          except:
-             st.error(f"Возникла проблема с обработкой вопроса **{i}**")
+             st.error(f"Возникла проблема с обработкой вопроса **{choice}**")
             
+# выбор медиа
+    for i in preference:
+        temp = pd.crosstab(data[i], data["0_concept_n"], margins = True)
+        temp.iloc[:-1,:] = temp.iloc[:-1,:]/temp.iloc[-1,:]
+        temp.drop(index = "All", inplace = True)
+        temp = temp.rename(columns={"All": "Среднее по концептам"})                
+        temp.index.name = "Ответы"
+        temp["Вопрос"] = i
+        temp = temp.set_index("Вопрос", append=True)
+        temp = temp.swaplevel()
+        temp["№"] = int(i.split(".")[0])
+        temp.sort_values(by="Среднее по концептам", ascending=False, inplace = True)
+        results = pd.concat([results, temp])
+
 # шкальные вопросы
     nums = []
     temp_res = pd.DataFrame()
