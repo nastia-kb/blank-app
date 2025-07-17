@@ -42,6 +42,7 @@ if st.button("Запустить"):
         data = pd.concat([data, temp_data])
 
     data = data.drop(columns=[col for col in data.columns if "Other (text)" in col])
+    data = data.drop(columns=[col for col in data.columns if "other answers" in col])
     data = data.drop(columns = ["Completion time, ms", "Answer Date"])
     cols = data.columns
 
@@ -51,9 +52,13 @@ if st.button("Запустить"):
     choice_clean = []
     for i in choice:
         index = i.rfind(':')
-        clean = i[:index]
-        if clean not in choice_clean:
-            choice_clean.append(clean)
+        if index != -1:
+            clean = i[:index]
+            if clean not in choice_clean:
+                choice_clean.append(clean)
+        else:
+            choice_clean.append(i)
+
 
     scale = cols[cols.str.contains("Scale")]
     preference = cols[cols.str.contains("Preference")]
@@ -69,31 +74,47 @@ if st.button("Запустить"):
 
 # вопросы с выбором ответа
     for choice in choice_clean:
-         try:
+         # try:
              temp_data = data.filter(like=choice)
-             clean_ans = []
-             for col in temp_data.columns:
-                 index = col.rfind(':')
-                 clean = col[index+2:]
-                 clean_ans.append(clean)
-             temp_data.columns = clean_ans
-             temp_data.dropna(axis = 0, inplace = True)
-             temp_data["0_concept_n"] = data.loc[temp_data.index, "0_concept_n"]
-             temp = temp_data.groupby("0_concept_n").sum().T
-             temp["Среднее по концептам"] = temp.sum(axis = 1)
-             bases = list(temp_data.groupby("0_concept_n").count()[clean_ans[0]])
-             bases.append(sum(bases))
-             temp.index.name = "Ответы"
-             temp["Вопрос"] = choice
-             temp = temp.set_index("Вопрос", append=True)
-             temp = temp.swaplevel()
-             temp = temp / bases
-             temp["№"] = int(choice.split(".")[0])
-             temp.sort_values(by="Среднее по концептам", ascending=False, inplace = True)
-             results = pd.concat([results, temp])
+
+             if temp_data.shape[1] == 1:
+                 temp = pd.crosstab(data[choice], data["0_concept_n"], margins = True)
+                 temp.iloc[:-1,:] = temp.iloc[:-1,:]/temp.iloc[-1,:]
+                 temp.drop(index = "All", inplace = True)
+                 temp = temp.rename(columns={"All": "Среднее по концептам"})                
+                 temp.index.name = "Ответы"
+                 temp["Вопрос"] = choice
+                 temp = temp.set_index("Вопрос", append=True)
+                 temp = temp.swaplevel()
+                 temp["№"] = int(choice.split(".")[0])
+                 temp.sort_values(by="Среднее по концептам", ascending=False, inplace = True)
+                 results = pd.concat([results, temp])
+                 
              
-         except:
-             st.error(f"Возникла проблема с обработкой вопроса **{choice}**")
+             else:
+                clean_ans = []
+                for col in temp_data.columns:
+                    index = col.rfind(':')
+                    clean = col[index+2:]
+                    clean_ans.append(clean)
+                temp_data.columns = clean_ans
+                temp_data.dropna(axis = 0, inplace = True)
+                temp_data["0_concept_n"] = data.loc[temp_data.index, "0_concept_n"]
+                temp = temp_data.groupby("0_concept_n").sum().T
+                temp["Среднее по концептам"] = temp.sum(axis = 1)
+                bases = list(temp_data.groupby("0_concept_n").count()[clean_ans[0]])
+                bases.append(sum(bases))
+                temp.index.name = "Ответы"
+                temp["Вопрос"] = choice
+                temp = temp.set_index("Вопрос", append=True)
+                temp = temp.swaplevel()
+                temp = temp / bases
+                temp["№"] = int(choice.split(".")[0])
+                temp.sort_values(by="Среднее по концептам", ascending=False, inplace = True)
+                results = pd.concat([results, temp])
+             
+         # except:
+             # st.error(f"Возникла проблема с обработкой вопроса **{choice}**")
             
 # выбор медиа
     for i in preference:
