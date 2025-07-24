@@ -52,7 +52,7 @@ if st.button("Запустить"):
     choice_clean = []
     for i in choice:
         index = i.rfind(':')
-        if index != -1:
+        if index != -1 and index !=len(i)-1:
             clean = i[:index]
             if clean not in choice_clean:
                 choice_clean.append(clean)
@@ -74,9 +74,8 @@ if st.button("Запустить"):
 
 # вопросы с выбором ответа
     for choice in choice_clean:
-         # try:
+         try:
              temp_data = data.filter(like=choice)
-
              if temp_data.shape[1] == 1:
                  temp = pd.crosstab(data[choice], data["0_concept_n"], margins = True)
                  temp.iloc[:-1,:] = temp.iloc[:-1,:]/temp.iloc[-1,:]
@@ -113,8 +112,8 @@ if st.button("Запустить"):
                 temp.sort_values(by="Среднее по концептам", ascending=False, inplace = True)
                 results = pd.concat([results, temp])
              
-         # except:
-             # st.error(f"Возникла проблема с обработкой вопроса **{choice}**")
+         except:
+             st.error(f"Возникла проблема с обработкой вопроса **{choice}**")
             
 # выбор медиа
     for i in preference:
