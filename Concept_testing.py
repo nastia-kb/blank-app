@@ -43,7 +43,7 @@ if st.button("Запустить"):
 
     data = data.drop(columns=[col for col in data.columns if "Other (text)" in col])
     data = data.drop(columns=[col for col in data.columns if "other answers" in col])
-    data = data.drop(columns = ["Completion time, ms", "Answer Date"])
+    data = data.drop(columns = ["Completion time, s", "Answer Date"])
     cols = data.columns
 
     open_qst = cols[cols.str.contains("Question")]
