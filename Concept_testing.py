@@ -38,7 +38,14 @@ if st.button("Запустить"):
         if k == 1:
             columns = temp_data.columns
         else:
-            temp_data.columns = columns
+            try:
+                temp_data.columns = columns
+            except: 
+                st.error(f"В файлах **разное количество столбцов**, из-за чего обработать их не удается."
+                         "\n Проверьте, что во всех файлах равное количество вопросов, и они идут в одном порядке")
+                st.stop()
+
+                
         data = pd.concat([data, temp_data])
 
     data = data.drop(columns=[col for col in data.columns if "Other (text)" in col])
